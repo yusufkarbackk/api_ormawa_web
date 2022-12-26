@@ -11,14 +11,20 @@ class AdminIn(BaseModel):
     password: str
 
 
+class AdminRegister(BaseModel):
+    username: str
+    password: str
+    ormawa: str
+
+
 class AdminOut(BaseModel):
-    id:int
+    id: int
     username: str
     role: str
     ormawa: str
 
 
-@router.post('/ormaweb/api/v1/auth/', response_model=AdminOut)
+@router.post('/ormaweb/api/v1/auth/login', response_model=AdminOut)
 async def login(admin: AdminIn):
     db = get_my_sql_connection()
 
@@ -41,3 +47,27 @@ async def login(admin: AdminIn):
                 "role": account[3],
                 "ormawa": account[4]
             }
+
+
+@router.post('/ormaweb/api/v1/auth/register')
+async def resgiter(admin: AdminRegister):
+    db = get_my_sql_connection()
+
+    username = admin.username
+    password = admin.password
+    ormawa = admin.ormawa
+
+    try:
+        cur = db.cursor()
+        sqlstr = f"insert into user (username, password, ormawa) values ('{username}', '{password}', '{ormawa}')"
+        cur.execute(sqlstr)
+        db.commit()
+        return {
+            'message': 'sukses'
+        }
+    except Exception as e:
+        print("Error in SQL:\n", e)
+        return {
+            'status': 'failed',
+            'message': e
+        }
