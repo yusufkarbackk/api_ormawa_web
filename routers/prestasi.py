@@ -8,20 +8,17 @@ import datetime
 router = APIRouter()
 
 
-class Kegiatan(BaseModel):
-    nama_kegiatan: str
-    hari: str
-    waktu: time
-    deskripsi: str
+class Prestasi(BaseModel):
+    nama_prestasi: str
 
 
-@router.get('/ormaweb/api/v1/kegiatan/{id_ormawa}')
-def show_kegiatan(id_ormawa: int):
+@router.get('/ormaweb/api/v1/prestasi/{id_ormawa}')
+def show_prestasi_by_id_ormawa(id_ormawa: int):
     db = get_my_sql_connection()
     result = {}
     result['results'] = []
     try:
-        sqlstr = f"SELECT * from kegiatan where id_ormawa={id_ormawa}"
+        sqlstr = f"SELECT * from prestasi where id_ormawa={id_ormawa}"
         cur = db.cursor()
         cur.execute(sqlstr)
         output_json = cur.fetchall()
@@ -31,28 +28,23 @@ def show_kegiatan(id_ormawa: int):
     finally:
         db.close()
     for i in output_json:
-        waktu = str(i[5])
 
         result['results'].append(
             {
-                'id_kegiatan': i[0],
-                'nama_kegiatan': i[1],
-                'hari': i[2],
-                'deskripsi': i[3],
-                'id_ormawa': i[4],
-                'waktu': waktu
+                'id_prestasi': i[0],
+                'nama_prestasi': i[1],
+                'id_ormawa': i[2],
             }
         )
     return result
 
 
-@router.post('/ormaweb/api/v1/kegiatan/{id_ormawa}')
-async def tambah_kegiatan(id_ormawa: int, kegiatan: Kegiatan):
+@router.post('/ormaweb/api/v1/prestasi/{id_ormawa}')
+async def tambah_prestasi(id_ormawa: int, prestasi: Prestasi):
     db = get_my_sql_connection()
-    waktu = kegiatan.waktu.strftime('%H:%M')
     try:
         cur = db.cursor()
-        sqlstr = f"INSERT INTO kegiatan (nama_kegiatan, hari, deskripsi, id_ormawa, waktu) VALUES('{kegiatan.nama_kegiatan}','{kegiatan.hari}', '{kegiatan.deskripsi}', {id_ormawa}, '{waktu}')"
+        sqlstr = f"INSERT INTO prestasi (nama_prestasi, id_ormawa) VALUES('{prestasi.nama_prestasi}',{id_ormawa})"
         cur.execute(sqlstr)
         db.commit()
         cur.close()
@@ -67,11 +59,11 @@ async def tambah_kegiatan(id_ormawa: int, kegiatan: Kegiatan):
     # print(genre)
 
 
-@router.delete('/ormaweb/api/v1/kegiatan/{id_kegiatan}')
-def delete_kegiatan(id_kegiatan: int):
+@router.delete('/ormaweb/api/v1/prestasi/{id_prestasi}')
+def delete_prestasi(id_prestasi: int):
     db = get_my_sql_connection()
     try:
-        sqlstr = f"delete from kegiatan where id_kegiatan={id_kegiatan}"
+        sqlstr = f"delete from prestasi where id_prestasi={id_prestasi}"
         cur = db.cursor()
         cur.execute(sqlstr)
         db.commit()
@@ -81,12 +73,12 @@ def delete_kegiatan(id_kegiatan: int):
         db.close()
 
 
-@router.get('/ormaweb/api/v1/kegiatan_by_id/{id_kegiatan}')
-def show_kegiatan_by_id(id_kegiatan: int):
+@router.get('/ormaweb/api/v1/prestasi_by_id/{id_prestasi}')
+def show_prestasi_by_id(id_prestasi: int):
     db = get_my_sql_connection()
     #result = {}
     try:
-        sqlstr = f"SELECT * from kegiatan where id_kegiatan={id_kegiatan}"
+        sqlstr = f"SELECT * from prestasi where id_prestasi={id_prestasi}"
         cur = db.cursor()
         cur.execute(sqlstr)
         output_json = cur.fetchall()
@@ -96,30 +88,26 @@ def show_kegiatan_by_id(id_kegiatan: int):
     finally:
         db.close()
     for i in output_json:
-        waktu = str(i[5])
 
         return {
-            'id_kegiatan': i[0],
-            'nama_kegiatan': i[1],
-            'hari': i[2],
-            'deskripsi': i[3],
-            'id_ormawa': i[4],
-            'waktu': waktu
+            'id_prestasi': i[0],
+            'nama_prestasi': i[1],
+            'id_ormawa': i[2],
         }
 
 
-@router.patch('/ormaweb/api/v1/kegiatan/{id_kegiatan}/')
-def update_kegiatan(id_kegiatan: int, kegiatan: Kegiatan):
+@router.patch('/ormaweb/api/v1/prestasi/{id_prestasi}/')
+def update_prestasi(id_prestasi: int, kegiatan: Prestasi):
     db = get_my_sql_connection()
 
-    data_ormawa = kegiatan.dict(exclude_unset=True)
-    print(data_ormawa)
+    data_prestasi = kegiatan.dict(exclude_unset=True)
+    print(data_prestasi)
 
-    for key, value in data_ormawa.items():
+    for key, value in data_prestasi.items():
         if value == None:
             continue
         try:
-            sqlstr = f"update kegiatan set {key} = '{value}' where id_kegiatan={id_kegiatan}"
+            sqlstr = f"update prestasi set nama_prestasi = '{value}' where id_prestasi={id_prestasi}"
             cur = db.cursor()
             cur.execute(sqlstr)
             db.commit()

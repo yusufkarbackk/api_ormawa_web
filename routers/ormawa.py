@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from database import get_my_sql_connection
 from pydantic import BaseModel
 from flask import jsonify
@@ -13,6 +13,7 @@ class Ormawa(BaseModel):
     visi: str
     misi: str
     ketua: str
+    alamat_gambar: str
 
 
 class OrmawaUpdate(BaseModel):
@@ -21,6 +22,7 @@ class OrmawaUpdate(BaseModel):
     visi: str | None = None
     misi: str | None = None
     ketua: str | None = None
+    alamat_gambar: str | None = None
 
 
 @router.get('/ormaweb/api/v1/ormawa/')
@@ -46,6 +48,7 @@ def show_ormawa():
             'visi': i[3],
             'misi': i[4],
             'ketua': i[5],
+            'alamat_gambar': i[6]
         })
     return result
 
@@ -72,16 +75,17 @@ def show_ormawa(id_ormawa: int):
         result['visi'] = i[3]
         result['misi'] = i[4]
         result['ketua'] = i[5]
+        result['alamat_gambar'] = i[6]
 
     return result
 
 
-@router.post('/ormaweb/api/v1/ormawa/')
+@router.post('/ormaweb/api/v1/ormawa/', status_code=status.HTTP_201_CREATED)
 async def tambah_ormawa(ormawa: Ormawa):
     db = get_my_sql_connection()
     try:
         cur = db.cursor()
-        sqlstr = f"INSERT INTO ormawa (nama_ormawa, deskripsi, visi, misi, ketua) VALUES('{ormawa.nama_ormawa}','{ormawa.deskripsi}', '{ormawa.visi}', '{ormawa.misi}', '{ormawa.ketua}')"
+        sqlstr = f"INSERT INTO ormawa (nama_ormawa, deskripsi, visi, misi, ketua, alamat_gambar) VALUES('{ormawa.nama_ormawa}','{ormawa.deskripsi}', '{ormawa.visi}', '{ormawa.misi}', '{ormawa.ketua}', '{ormawa.alamat_gambar}')"
         cur.execute(sqlstr)
         db.commit()
         cur.close()
@@ -89,6 +93,7 @@ async def tambah_ormawa(ormawa: Ormawa):
         # output_json = cur.fetchall()
     except Exception as e:
         print("Error in SQL:\n", e)
+        return status.HTTP_500_INTERNAL_SERVER_ERROR
     finally:
         db.close()
     # print(genre)
